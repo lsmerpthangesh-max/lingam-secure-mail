@@ -1,0 +1,135 @@
+Here is an absolute, detailed architectural guide explaining exactly how your code is built, what systems and libraries are used, and how it handles security.
+
+Part 1: The Core Tech Stack (What is Used)
+Your application is completely written in Python 3 and leverages a highly specific stack of libraries to achieve a secure, lightweight, and modern email system. Below are the exact components utilized in the code:
+
+Streamlit (import streamlit as st): Serves as the interactive web framework and presentation UI. It handles the browser rendering, form inputs, real-time page transitions, and the green-yellow visual brand identity.
+
+SQLite3 (import sqlite3): The local relational database engine. It stores user profiles, encrypted messages, external configurations, and security audit logs inside a single, zero-configuration file (secure_mail.db).
+
+Cryptography (from cryptography.fernet import Fernet): Implements standard symmetric key encryption. It ensures all confidential email data (subject and body) is fully encrypted before entering the database.
+
+Bcrypt (import bcrypt): A secure password-hashing function specifically engineered to protect account login keys against high-speed brute-force cracking attempts.
+
+SMTP (import smtplib): The Simple Mail Transfer Protocol client. This is used to securely connect to Google's outbound mail servers and transmit real emails to standard outside Gmail accounts.
+
+IMAP (import imaplib): The Internet Message Access Protocol client. This is the background bridge used to authenticate into Gmail and pull raw unread incoming messages into your dashboard.
+
+Email Parser (import email): Built-in library used to decode MIME metadata structures, pull parseable attachments, extract raw message fields, and cleanly render complex email structures.
+
+Part 2: Security Architecture & Flow Guide
+To help you understand how safe your data is, this is exactly how the information loops through your system step-by-step:
+
+1. The Key Initialization (System Startup)
+Every time your application starts up, it checks for a file named secret.key. If it doesn't exist, it auto-generates a master cryptographic key and saves it to the server.
+
+Why this matters: The key is separate from your database file. An attacker must steal both files to compromise any email message text.
+
+2. User Registration & Authentication (Login Flow)
+When an administrator provisions a new user:
+
+The plain password string is passed to bcrypt.
+
+bcrypt generates a unique random sequence called a "salt" and securely mixes it into the password.
+
+The resulting long binary hash string is what gets saved to the database.
+
+Why this matters: When a user logs in, the code compares the input with the mathematical hash. Your actual text passwords are never stored anywhere in the system.
+
+3. Writing and Sending Mail (Inbound/Outbound Flow)
+When a user writes an email and hits "Dispatch Mail":
+
+The code catches the plain subject and msg strings.
+
+They are passed directly into the encryption cipher function: encrypt(subject).
+
+The plain language text is immediately converted into an unreadable, scrambled binary string.
+
+That binary string is written to the database column.
+
+If the target address is an external Gmail (@gmail.com), the application routes the mail through the Admin's secure Gmail account connection, injecting a custom local tracking banner at the top of the email body text.
+
+4. The Master Intercept Gate (Admin Framework)
+The system tracks and intercepts traffic safely. To guarantee perfect stability, your data reads operate through a locked range:
+
+The database query isolates the stream with LIMIT 30.
+
+Only the latest 30 active items are pulled up.
+
+This completely prevents database deadlocks, memory freezes, and thread conflicts when loading massive quantities of information.
+
+Part 3: Operational Guide (How to Maintain the System)
+For the administrator, maintaining this environment requires zero complex infrastructure management. Simply remember these key handling parameters:
+
+Backup Protocol: To back up your whole system, you only need to copy two files: secure_mail.db (your data) and secret.key (your decryption capability). Keep them safe.
+
+Resetting the Admin Account: If you ever change or lose your admin password, the script contains a built-in safety fallback—simply use username admin with admin@123 to trigger an auto-rebuild of the superadmin tier. Once logged in, immediately update it under the Profile & Security menu.
+
+Connecting the Gateway: Since the user configuration has been moved safely away from the employee dashboard view, ensure that you input your corporate Gmail master address and its 16-Digit App Password token (generated from your Google account security panel) into the Connect Gmail Account menu to keep the live synchronization working perfectly.Here is an absolute, detailed architectural guide explaining exactly how your code is built, what systems and libraries are used, and how it handles security.
+
+Part 1: The Core Tech Stack (What is Used)
+Your application is completely written in Python 3 and leverages a highly specific stack of libraries to achieve a secure, lightweight, and modern email system. Below are the exact components utilized in the code:
+
+Streamlit (import streamlit as st): Serves as the interactive web framework and presentation UI. It handles the browser rendering, form inputs, real-time page transitions, and the green-yellow visual brand identity.
+
+SQLite3 (import sqlite3): The local relational database engine. It stores user profiles, encrypted messages, external configurations, and security audit logs inside a single, zero-configuration file (secure_mail.db).
+
+Cryptography (from cryptography.fernet import Fernet): Implements standard symmetric key encryption. It ensures all confidential email data (subject and body) is fully encrypted before entering the database.
+
+Bcrypt (import bcrypt): A secure password-hashing function specifically engineered to protect account login keys against high-speed brute-force cracking attempts.
+
+SMTP (import smtplib): The Simple Mail Transfer Protocol client. This is used to securely connect to Google's outbound mail servers and transmit real emails to standard outside Gmail accounts.
+
+IMAP (import imaplib): The Internet Message Access Protocol client. This is the background bridge used to authenticate into Gmail and pull raw unread incoming messages into your dashboard.
+
+Email Parser (import email): Built-in library used to decode MIME metadata structures, pull parseable attachments, extract raw message fields, and cleanly render complex email structures.
+
+Part 2: Security Architecture & Flow Guide
+To help you understand how safe your data is, this is exactly how the information loops through your system step-by-step:
+
+1. The Key Initialization (System Startup)
+Every time your application starts up, it checks for a file named secret.key. If it doesn't exist, it auto-generates a master cryptographic key and saves it to the server.
+
+Why this matters: The key is separate from your database file. An attacker must steal both files to compromise any email message text.
+
+2. User Registration & Authentication (Login Flow)
+When an administrator provisions a new user:
+
+The plain password string is passed to bcrypt.
+
+bcrypt generates a unique random sequence called a "salt" and securely mixes it into the password.
+
+The resulting long binary hash string is what gets saved to the database.
+
+Why this matters: When a user logs in, the code compares the input with the mathematical hash. Your actual text passwords are never stored anywhere in the system.
+
+3. Writing and Sending Mail (Inbound/Outbound Flow)
+When a user writes an email and hits "Dispatch Mail":
+
+The code catches the plain subject and msg strings.
+
+They are passed directly into the encryption cipher function: encrypt(subject).
+
+The plain language text is immediately converted into an unreadable, scrambled binary string.
+
+That binary string is written to the database column.
+
+If the target address is an external Gmail (@gmail.com), the application routes the mail through the Admin's secure Gmail account connection, injecting a custom local tracking banner at the top of the email body text.
+
+4. The Master Intercept Gate (Admin Framework)
+The system tracks and intercepts traffic safely. To guarantee perfect stability, your data reads operate through a locked range:
+
+The database query isolates the stream with LIMIT 30.
+
+Only the latest 30 active items are pulled up.
+
+This completely prevents database deadlocks, memory freezes, and thread conflicts when loading massive quantities of information.
+
+Part 3: Operational Guide (How to Maintain the System)
+For the administrator, maintaining this environment requires zero complex infrastructure management. Simply remember these key handling parameters:
+
+Backup Protocol: To back up your whole system, you only need to copy two files: secure_mail.db (your data) and secret.key (your decryption capability). Keep them safe.
+
+Resetting the Admin Account: If you ever change or lose your admin password, the script contains a built-in safety fallback—simply use username admin with admin@123 to trigger an auto-rebuild of the superadmin tier. Once logged in, immediately update it under the Profile & Security menu.
+
+Connecting the Gateway: Since the user configuration has been moved safely away from the employee dashboard view, ensure that you input your corporate Gmail master address and its 16-Digit App Password token (generated from your Google account security panel) into the Connect Gmail Account menu to keep the live synchronization working perfectly.
